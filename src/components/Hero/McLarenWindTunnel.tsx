@@ -30,19 +30,18 @@ export function McLarenWindTunnel() {
     if (!ctx) return;
 
     let animId: number;
-    let width = (canvas.width = container.clientWidth || window.innerWidth);
-    let height = (canvas.height = container.clientHeight || window.innerHeight);
+    let width = (canvas.width = container.clientWidth || 1200);
+    let height = (canvas.height = container.clientHeight || 500);
 
     const handleResize = () => {
       if (!container || !canvas) return;
-      width = canvas.width = container.clientWidth || window.innerWidth;
-      height = canvas.height = container.clientHeight || window.innerHeight;
+      width = canvas.width = container.clientWidth;
+      height = canvas.height = container.clientHeight;
     };
 
     window.addEventListener("resize", handleResize);
 
-    // Full-screen aerodynamic discrete stepped streamline pulses
-    const streamCount = 28;
+    const streamCount = 24;
     const dashPatterns = [
       [16, 24, 6, 32],
       [10, 18, 28, 14],
@@ -51,14 +50,14 @@ export function McLarenWindTunnel() {
     ];
 
     const streamlines: Streamline[] = Array.from({ length: streamCount }, (_, i) => {
-      const isTopFlow = i < 18;
+      const isTopFlow = i < 16;
       return {
         x: Math.random() * width,
-        yOffset: isTopFlow ? 0.22 + (i / 18) * 0.42 : 0.68 + ((i - 18) / 10) * 0.22,
-        length: 100 + Math.random() * 160,
-        speed: 0.8 + Math.random() * 1.2,
-        opacity: 0.25 + Math.random() * 0.4,
-        thickness: 1.2 + Math.random() * 1.6,
+        yOffset: isTopFlow ? 0.22 + (i / 16) * 0.42 : 0.66 + ((i - 16) / 8) * 0.22,
+        length: 90 + Math.random() * 130,
+        speed: 0.8 + Math.random() * 1.1,
+        opacity: 0.28 + Math.random() * 0.4,
+        thickness: 1.2 + Math.random() * 1.4,
         dashPattern: dashPatterns[i % dashPatterns.length],
         color: i % 3 === 0 ? "rgba(56, 189, 248, " : "rgba(255, 255, 255, ",
       };
@@ -89,11 +88,11 @@ export function McLarenWindTunnel() {
         const t = Math.max(0, Math.min(1, (s.x + s.length / 2) / width));
         
         let aeroDeflection = 0;
-        if (t > 0.08 && t < 0.92) {
-          const normalizedT = (t - 0.08) / 0.84;
-          aeroDeflection = -Math.sin(normalizedT * Math.PI) * (height * 0.24);
-          if (normalizedT > 0.65) {
-            aeroDeflection += Math.sin((normalizedT - 0.65) * Math.PI * 3.2) * (height * 0.06);
+        if (t > 0.12 && t < 0.88) {
+          const normalizedT = (t - 0.12) / 0.76;
+          aeroDeflection = -Math.sin(normalizedT * Math.PI) * (height * 0.22);
+          if (normalizedT > 0.68) {
+            aeroDeflection += Math.sin((normalizedT - 0.68) * Math.PI * 3.2) * (height * 0.05);
           }
         }
 
@@ -112,9 +111,9 @@ export function McLarenWindTunnel() {
         ctx.moveTo(s.x, currentY);
         const nextT = Math.max(0, Math.min(1, (s.x + s.length) / width));
         let nextAero = 0;
-        if (nextT > 0.08 && nextT < 0.92) {
-          const normNextT = (nextT - 0.08) / 0.84;
-          nextAero = -Math.sin(normNextT * Math.PI) * (height * 0.24);
+        if (nextT > 0.12 && nextT < 0.88) {
+          const normNextT = (nextT - 0.12) / 0.76;
+          nextAero = -Math.sin(normNextT * Math.PI) * (height * 0.22);
         }
         const nextY = height * s.yOffset + nextAero;
 
@@ -141,44 +140,44 @@ export function McLarenWindTunnel() {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full overflow-hidden select-none flex items-center justify-center"
+      className="relative w-full h-full select-none flex items-center justify-center p-2"
     >
-      {/* Background Grid */}
+      {/* Background Subtle Grid */}
       <div
         className="pointer-events-none absolute inset-0 opacity-10"
         style={{
           backgroundImage:
             "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
-          backgroundSize: "36px 36px",
+          backgroundSize: "32px 32px",
         }}
       />
 
-      {/* Atmospheric Behind Glow */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-64 bg-sky-500/15 blur-3xl rounded-full" />
+      {/* Atmospheric Ambient Glow */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 max-w-4xl h-44 bg-sky-500/15 blur-3xl rounded-full" />
 
-      {/* Massive Full-Window Covering McLaren P1 Side Profile Image */}
-      <div className="relative z-10 w-full h-full flex items-center justify-center px-2">
+      {/* 100% Uncropped Responsive McLaren P1 Image */}
+      <div className="relative z-10 w-full h-full flex items-center justify-center max-w-6xl">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/images/McLaren P1 Side Profile.png"
           alt="McLaren P1 Aerodynamic Side Profile"
-          className="w-full h-auto max-h-[85vh] object-contain filter drop-shadow-[0_25px_60px_rgba(0,0,0,0.95)] opacity-85 scale-125 sm:scale-145 md:scale-160 lg:scale-175 transition-transform duration-1000 select-none"
+          className="w-full h-auto max-h-[52vh] sm:max-h-[60vh] md:max-h-[65vh] object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.95)] opacity-90 transition-transform duration-700 select-none"
         />
       </div>
 
-      {/* Stepped Full-Window Wind Flow Streamlines Canvas */}
+      {/* Stepped Wind Flow Streamlines Canvas */}
       <canvas
         ref={canvasRef}
         className="pointer-events-none absolute inset-0 z-20 h-full w-full"
       />
 
       {/* Telemetry Labels */}
-      <div className="pointer-events-none absolute top-4 left-6 z-30 flex items-center gap-2 rounded-full border border-white/10 bg-black/80 px-3.5 py-1 font-mono text-[10px] text-zinc-300 backdrop-blur-md">
+      <div className="pointer-events-none absolute top-3 left-4 sm:left-8 z-30 flex items-center gap-2 rounded-full border border-white/10 bg-black/80 px-3.5 py-1 font-mono text-[10px] text-zinc-300 backdrop-blur-md">
         <Wind className="h-3 w-3 text-sky-400" />
-        <span>MCLAREN P1 // FULL-WINDOW AERODYNAMICS</span>
+        <span>MCLAREN P1 // STEPPED CFD FLOW</span>
       </div>
 
-      <div className="pointer-events-none absolute top-4 right-6 z-30 flex items-center gap-2 rounded-full border border-white/10 bg-black/80 px-3.5 py-1 font-mono text-[10px] text-zinc-300 backdrop-blur-md">
+      <div className="pointer-events-none absolute top-3 right-4 sm:right-8 z-30 flex items-center gap-2 rounded-full border border-white/10 bg-black/80 px-3.5 py-1 font-mono text-[10px] text-zinc-300 backdrop-blur-md">
         <Gauge className="h-3 w-3 text-sky-400" />
         <span className="text-white font-bold">{speedVal} KM/H</span>
       </div>

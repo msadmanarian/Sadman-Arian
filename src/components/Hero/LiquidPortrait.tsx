@@ -22,7 +22,6 @@ export function LiquidPortrait({
 
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // WebGL & Interaction State Refs
   const stateRef = useRef({
     renderer: null as THREE.WebGLRenderer | null,
     scene: null as THREE.Scene | null,
@@ -117,7 +116,7 @@ export function LiquidPortrait({
         imageSrc,
         (loadedTexture) => {
           if (!isSubscribed) return;
-          loadedTexture.minFilter = THREE.NearestFilter;
+          loadedTexture.minFilter = THREE.LinearFilter;
           loadedTexture.magFilter = THREE.NearestFilter;
           loadedTexture.generateMipmaps = false;
 
@@ -137,7 +136,7 @@ export function LiquidPortrait({
               u_velocity: { value: new THREE.Vector2(0, 0) },
               u_time: { value: 0 },
               u_strength: { value: 0.0 },
-              u_radius: { value: 0.38 },
+              u_radius: { value: 0.36 },
               u_tilt_x: { value: 0.0 },
               u_tilt_y: { value: 0.0 },
               u_scroll_progress: { value: 0.0 },
@@ -190,13 +189,11 @@ export function LiquidPortrait({
         state.tilt.x += (state.targetTilt.x - state.tilt.x) * 0.06;
         state.tilt.y += (state.targetTilt.y - state.tilt.y) * 0.06;
 
-        // Track scroll progress for scroll pixelation and slow dissolve
         const scrollY = window.scrollY;
         const heroHeight = window.innerHeight * 0.9;
         const rawProgress = Math.min(Math.max(scrollY / heroHeight, 0.0), 1.0);
         state.scrollProgress += (rawProgress - state.scrollProgress) * 0.1;
 
-        // Uniforms
         const uniforms = state.material.uniforms;
         uniforms.u_time.value = elapsedTime;
         uniforms.u_mouse.value.copy(state.currentMouse);
@@ -248,12 +245,12 @@ export function LiquidPortrait({
       onPointerLeave={handlePointerLeave}
       onPointerDown={handlePointerEnter}
       onPointerUp={handlePointerMove}
-      className={`group relative overflow-hidden select-none touch-none w-full h-full bg-transparent ${className}`}
+      className={`group relative select-none touch-none w-full h-full flex items-center justify-center bg-transparent ${className}`}
       role="img"
       aria-label={alt}
     >
       {/* Ambient Behind Glow */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 rounded-full bg-sky-500/15 blur-3xl opacity-40 transition-opacity duration-700 group-hover:opacity-70" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 rounded-full bg-sky-500/15 blur-3xl opacity-35 transition-opacity duration-700 group-hover:opacity-60" />
 
       {/* Main Minecraft Voxel WebGL Canvas */}
       <canvas
@@ -264,10 +261,9 @@ export function LiquidPortrait({
       />
 
       {/* Minecraft Voxel Indicator Badge */}
-      <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2.5 rounded-full bg-black/70 px-4 py-1.5 backdrop-blur-xl border border-white/10 text-[10px] font-mono tracking-widest text-zinc-300">
+      <div className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full bg-black/70 px-3.5 py-1 backdrop-blur-xl border border-white/10 text-[10px] font-mono tracking-widest text-zinc-300">
         <span className="h-1.5 w-1.5 rounded-sm bg-sky-400 animate-pulse" />
         <span className="text-white font-bold">VOXEL PIXELATED</span>
-        <span className="text-zinc-500 hidden sm:inline">// SCROLL TO DISSOLVE</span>
       </div>
     </div>
   );

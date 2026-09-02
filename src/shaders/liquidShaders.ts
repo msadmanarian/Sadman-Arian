@@ -18,27 +18,28 @@ export const liquidFragmentShader = /* glsl */ `
   uniform float u_radius;
   uniform float u_tilt_x;
   uniform float u_tilt_y;
-  uniform float u_scroll_progress; // 0.0 at top -> 1.0 scrolled down
+  uniform float u_scroll_progress;
 
   varying vec2 vUv;
 
-  // 2D Random
   float random(vec2 st) {
     return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
   }
 
-  // Calculate object-fit: cover texture coordinates
-  vec2 getCoverUv(vec2 uv, vec2 screenRes, vec2 imgRes) {
+  // Object-fit contain logic so subject is NEVER cropped at any zoom level or screen aspect
+  vec2 getContainUv(vec2 uv, vec2 screenRes, vec2 imgRes) {
     float screenAspect = screenRes.x / screenRes.y;
     float imgAspect = imgRes.x / imgRes.y;
 
     vec2 newUv = uv;
     if (screenAspect > imgAspect) {
-      float scale = screenAspect / imgAspect;
-      newUv.y = (uv.y - 0.5) * scale + 0.5;
-    } else {
+      // Screen is wider than image: fit height, center width
       float scale = imgAspect / screenAspect;
-      newUv.x = (uv.x - 0.5) * scale + 0.5;
+      newUv.x = (uv.x - 0.5) / scale + 0.5;
+    } else {
+      // Screen is taller than image: fit width, center height
+      float scale = screenAspect / imgAspect;
+      newUv.y = (uv.y - 0.5) / scale + 0.5;
     }
     return newUv;
   }
@@ -46,43 +47,41 @@ export const liquidFragmentShader = /* glsl */ `
   void main() {
     float aspect = u_resolution.x / u_resolution.y;
 
-    // 1. Minecraft Pixelation Grid Calculation
-    // Base resolution: ~140 blocks across. On scroll down, pixelate progressively down to 12 chunky blocks!
-    float scrollPixelFactor = pow(clamp(u_scroll_progress, 0.0, 1.0), 1.3);
-    float baseGrid = mix(140.0, 14.0, scrollPixelFactor);
-    
-    // Zoom magnification on portrait
-    vec2 centeredUv = (vUv - vec2(0.5, 0.45)) * 0.85 + vec2(0.5, 0.45);
+    // 1. Dynamic Zoom-Proof Minecraft Voxel Grid
+    float scrollPixelFactor = pow(clamp(u_scroll_progress, 0.0, 1.0), 1.2);
+    float baseGrid = mix(120.0, 16.0, scrollPixelFactor);
 
-    // Volumetric 3D Parallax tilt
-    vec2 tiltOffset = vec2(u_tilt_x, u_tilt_y) * 0.015 * (1.0 - scrollPixelFactor);
-    vec2 parallaxUv = centeredUv + tiltOffset;
+    // Subtle 3D volumetric parallax
+    vec2 tiltOffset = vec2(u_tilt_x, u_tilt_y) * 0.012 * (1.0 - scrollPixelFactor);
+    vec2 parallaxUv = vUv + tiltOffset;
 
-    // Apply Minecraft Voxel Grid Snapping
+    // Snapped voxel coordinates
     vec2 gridCount = vec2(baseGrid * aspect, baseGrid);
     vec2 pixelatedUv = floor(parallaxUv * gridCount) / gridCount;
 
-    // Cover-fit image UV
-    vec2 imgUv = getCoverUv(pixelatedUv, u_resolution, u_image_resolution);
-    imgUv = clamp(imgUv, 0.0, 1.0);
+    // 2. Sample texture with zero-cropping contain UV
+    vec2 imgUv = getContainUv(pixelatedUv, u_resolution, u_image_resolution);
 
-    // Sample portrait image
+    // If UV is outside the contained texture bounds, discard gracefully
+    if (imgUv.x < 0.0 || imgUv.x > 1.0 || imgUv.y < 0.0 || imgUv.y > 1.0) {
+      discard;
+    }
+
     vec4 colorTex = texture2D(u_texture, imgUv);
 
-    // 2. Remove Dark Background (Chroma-Alpha punchout)
+    // 3. Remove pure black background without clipping the subject
     float lum = dot(colorTex.rgb, vec3(0.299, 0.587, 0.114));
-    // Soft cutoff for black backdrop
-    float bgAlpha = smoothstep(0.015, 0.08, lum);
+    float bgAlpha = smoothstep(0.012, 0.065, lum);
 
     if (bgAlpha < 0.01) {
       discard;
     }
 
     // High quality B&W conversion
-    float contrastLum = pow(lum, 1.15) * 1.08;
+    float contrastLum = pow(lum, 1.12) * 1.05;
     vec3 bwColor = vec3(clamp(contrastLum, 0.0, 1.0));
 
-    // 3. Minecraft Pixelated Color Reveal Interaction
+    // 4. Interactive Minecraft Voxel Color Reveal
     vec2 aspectPixelUv = pixelatedUv;
     aspectPixelUv.x *= aspect;
 
@@ -90,28 +89,25 @@ export const liquidFragmentShader = /* glsl */ `
     aspectMouse.x *= aspect;
 
     float distToMouse = length(aspectPixelUv - aspectMouse);
-
-    // Organic voxel threshold
-    float voxelNoise = (random(pixelatedUv) - 0.5) * 0.06;
+    float voxelNoise = (random(pixelatedUv) - 0.5) * 0.05;
     float effectiveDist = distToMouse + voxelNoise;
 
-    float revealMask = 1.0 - smoothstep(u_radius - 0.12, u_radius + 0.12, effectiveDist);
+    float revealMask = 1.0 - smoothstep(u_radius - 0.15, u_radius + 0.15, effectiveDist);
     float revealAmount = clamp(revealMask * u_strength, 0.0, 1.0);
 
-    // Voxel edge highlight (Minecraft block outline glow on reveal)
+    // Minecraft voxel outline glow
     vec2 blockCoord = fract(parallaxUv * gridCount);
-    float gridEdge = step(0.92, blockCoord.x) + step(0.92, blockCoord.y);
-    vec3 blockBorderGlow = vec3(0.22, 0.74, 0.97) * gridEdge * 0.15 * revealAmount;
+    float gridEdge = step(0.93, blockCoord.x) + step(0.93, blockCoord.y);
+    vec3 blockBorderGlow = vec3(0.22, 0.74, 0.97) * gridEdge * 0.12 * revealAmount;
 
-    // Blend: Grayscale Voxel -> Minecraft Full Color Voxel
     vec3 finalColor = mix(bwColor, colorTex.rgb, revealAmount) + blockBorderGlow;
 
-    // 4. Scroll Dissolve: Slowly lose opacity & fade out as user scrolls
-    float scrollFade = 1.0 - smoothstep(0.15, 0.85, u_scroll_progress);
+    // 5. Scroll Dissolve
+    float scrollFade = 1.0 - smoothstep(0.12, 0.85, u_scroll_progress);
     float finalAlpha = bgAlpha * scrollFade;
 
-    // Bottom gradient soft fade
-    float bottomFade = smoothstep(0.0, 0.25, vUv.y);
+    // Gentle bottom fade
+    float bottomFade = smoothstep(0.0, 0.15, vUv.y);
     finalAlpha *= bottomFade;
 
     gl_FragColor = vec4(finalColor, finalAlpha);
