@@ -80,7 +80,7 @@ export const portfolioData: PortfolioData = {
   socialLinks: [
     {
       name: "GitHub",
-      url: "https://github.com/arian",
+      url: "https://github.com/msadmanarian",
       label: "View repositories",
     },
     {
@@ -110,7 +110,7 @@ export const portfolioData: PortfolioData = {
       technologies: ["Python", "XGBoost", "SHAP", "FastAPI", "React", "TypeScript"],
       year: "2025",
       liveUrl: "#",
-      githubUrl: "https://github.com",
+      githubUrl: "https://github.com/msadmanarian",
       featured: true,
     },
     {
@@ -122,7 +122,7 @@ export const portfolioData: PortfolioData = {
       technologies: ["WebGL", "GLSL Shaders", "Three.js", "React", "TypeScript"],
       year: "2024",
       liveUrl: "#",
-      githubUrl: "https://github.com",
+      githubUrl: "https://github.com/msadmanarian",
       featured: true,
     },
     {
@@ -134,7 +134,7 @@ export const portfolioData: PortfolioData = {
       technologies: ["TypeScript", "Node.js", "Go", "Docker", "Redis", "Next.js"],
       year: "2024",
       liveUrl: "#",
-      githubUrl: "https://github.com",
+      githubUrl: "https://github.com/msadmanarian",
       featured: true,
     },
     {
@@ -146,7 +146,7 @@ export const portfolioData: PortfolioData = {
       technologies: ["React", "Tailwind CSS", "Storybook", "Figma", "CSS Architecture"],
       year: "2023",
       liveUrl: "#",
-      githubUrl: "https://github.com",
+      githubUrl: "https://github.com/msadmanarian",
       featured: false,
     },
   ],
