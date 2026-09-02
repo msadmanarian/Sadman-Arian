@@ -9,12 +9,14 @@ interface LiquidPortraitProps {
   imageSrc: string;
   alt?: string;
   className?: string;
+  seamless?: boolean;
 }
 
 export function LiquidPortrait({
   imageSrc = "/images/portrait.jpg",
   alt = "M. Sakib Sadman Arian Portrait",
   className = "",
+  seamless = true,
 }: LiquidPortraitProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -62,7 +64,6 @@ export function LiquidPortrait({
         state.currentMouse.set(x, y);
         state.prevMouse.set(x, y);
 
-        // Fallback update
         setFallbackPos({
           x: ((e.clientX - rect.left) / rect.width) * 100,
           y: ((e.clientY - rect.top) / rect.height) * 100,
@@ -83,12 +84,11 @@ export function LiquidPortrait({
     const state = stateRef.current;
     state.targetMouse.set(x, y);
 
-    // Parallax tilt from center
+    // Parallax tilt
     const tiltX = (x - 0.5) * 2;
     const tiltY = (y - 0.5) * 2;
     state.targetTilt.set(tiltX, tiltY);
 
-    // Fallback update
     setFallbackPos({
       x: ((e.clientX - rect.left) / rect.width) * 100,
       y: ((e.clientY - rect.top) / rect.height) * 100,
@@ -131,8 +131,8 @@ export function LiquidPortrait({
 
       const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio : 1, 2.0);
       renderer.setPixelRatio(dpr);
-      const width = container.clientWidth || 500;
-      const height = container.clientHeight || 650;
+      const width = container.clientWidth || 600;
+      const height = container.clientHeight || 800;
       renderer.setSize(width, height);
       stateRef.current.renderer = renderer;
 
@@ -163,8 +163,8 @@ export function LiquidPortrait({
               u_velocity: { value: new THREE.Vector2(0, 0) },
               u_time: { value: 0 },
               u_strength: { value: 0.0 },
-              u_radius: { value: 0.32 },
-              u_edge_softness: { value: 0.16 },
+              u_radius: { value: 0.35 },
+              u_edge_softness: { value: 0.18 },
               u_tilt_x: { value: 0.0 },
               u_tilt_y: { value: 0.0 },
             },
@@ -211,13 +211,13 @@ export function LiquidPortrait({
         state.currentMouse.x += (state.targetMouse.x - state.currentMouse.x) * lerpFactor;
         state.currentMouse.y += (state.targetMouse.y - state.currentMouse.y) * lerpFactor;
 
-        // Compute velocity with damping
+        // Velocity computation with damping
         const rawVelX = (state.currentMouse.x - prevCurrentX) / Math.max(delta, 0.016);
         const rawVelY = (state.currentMouse.y - prevCurrentY) / Math.max(delta, 0.016);
         state.velocity.x += (rawVelX * 0.08 - state.velocity.x) * 0.15;
         state.velocity.y += (rawVelY * 0.08 - state.velocity.y) * 0.15;
 
-        // Smooth strength transition (quick enter, smooth dissolved leave)
+        // Smooth strength transition
         const strengthSpeed = state.isPointerInside ? 0.08 : 0.04;
         state.currentStrength += (state.targetStrength - state.currentStrength) * strengthSpeed;
 
@@ -285,16 +285,24 @@ export function LiquidPortrait({
       onPointerLeave={handlePointerLeave}
       onPointerDown={handlePointerEnter}
       onPointerUp={handlePointerMove}
-      className={`group relative overflow-hidden rounded-2xl select-none touch-none transition-all duration-700 ${className}`}
+      className={`group relative overflow-hidden select-none touch-none transition-all duration-700 ${
+        seamless
+          ? "w-full h-full bg-transparent"
+          : "rounded-2xl border border-white/10 bg-zinc-950 shadow-2xl"
+      } ${className}`}
       style={{
-        background: "radial-gradient(circle at center, #18181f 0%, #09090c 100%)",
-        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08)",
+        maskImage: seamless
+          ? "linear-gradient(to bottom, black 0%, black 80%, transparent 100%)"
+          : undefined,
+        WebkitMaskImage: seamless
+          ? "linear-gradient(to bottom, black 0%, black 80%, transparent 100%)"
+          : undefined,
       }}
       role="img"
       aria-label={alt}
     >
-      {/* Subtle Glowing Backdrop Effect */}
-      <div className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-tr from-sky-500/10 via-transparent to-amber-500/10 opacity-40 blur-xl transition-opacity duration-700 group-hover:opacity-75" />
+      {/* Ambient Behind Glow */}
+      <div className="pointer-events-none absolute -inset-10 rounded-full bg-sky-500/10 opacity-30 blur-3xl transition-opacity duration-700 group-hover:opacity-60" />
 
       {/* Main WebGL Canvas */}
       {!fallbackActive && !hasWebGLError && (
@@ -306,10 +314,9 @@ export function LiquidPortrait({
         />
       )}
 
-      {/* Graceful CSS / DOM Fallback (if WebGL unavailable) */}
+      {/* Graceful CSS / DOM Fallback */}
       {(fallbackActive || hasWebGLError) && (
         <div className="relative h-full w-full overflow-hidden">
-          {/* Grayscale Base Image */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={imageSrc}
@@ -317,13 +324,12 @@ export function LiquidPortrait({
             className="h-full w-full object-cover filter grayscale contrast-125 brightness-95"
           />
 
-          {/* Color Reveal Mask Layer */}
           <div
             className="pointer-events-none absolute inset-0 transition-opacity duration-500 ease-out"
             style={{
               opacity: fallbackPos.active ? 1 : 0,
-              maskImage: `radial-gradient(circle 180px at ${fallbackPos.x}% ${fallbackPos.y}%, black 20%, transparent 80%)`,
-              WebkitMaskImage: `radial-gradient(circle 180px at ${fallbackPos.x}% ${fallbackPos.y}%, black 20%, transparent 80%)`,
+              maskImage: `radial-gradient(circle 220px at ${fallbackPos.x}% ${fallbackPos.y}%, black 20%, transparent 80%)`,
+              WebkitMaskImage: `radial-gradient(circle 220px at ${fallbackPos.x}% ${fallbackPos.y}%, black 20%, transparent 80%)`,
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -332,25 +338,11 @@ export function LiquidPortrait({
         </div>
       )}
 
-      {/* Loading Skeleton */}
-      {!isLoaded && !fallbackActive && !hasWebGLError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/80 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-3">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white" />
-            <span className="font-mono text-xs uppercase tracking-widest text-zinc-400">
-              Initializing Liquid Shader
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Floating Status Indicator Tag */}
-      <div className="pointer-events-none absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-lg bg-black/40 px-3.5 py-2 backdrop-blur-md border border-white/10 text-[11px] font-mono tracking-wider text-zinc-300">
-        <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
-          <span className="text-zinc-200">INTERACTIVE PORTRAIT</span>
-        </div>
-        <span className="hidden sm:inline text-zinc-400">HOVER / DRAG TO REVEAL</span>
+      {/* Subtle Bottom Floating Status Badge */}
+      <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 rounded-full bg-black/60 px-4 py-1.5 backdrop-blur-xl border border-white/10 text-[11px] font-mono tracking-widest text-zinc-300">
+        <span className="h-1.5 w-1.5 rounded-full bg-sky-400 animate-ping" />
+        <span className="text-zinc-200">INTERACTIVE PORTRAIT</span>
+        <span className="text-zinc-500 hidden sm:inline">// HOVER / DRAG</span>
       </div>
     </div>
   );

@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { portfolioData } from "@/data/portfolio";
 
 interface SectionBackdropProps {
   children: React.ReactNode;
   image?: string;
+  usePortrait?: boolean;
   tone?: "duotone" | "blurred" | "dim";
   parallax?: boolean;
   className?: string;
@@ -13,14 +15,16 @@ interface SectionBackdropProps {
 export function SectionBackdrop({
   children,
   image,
+  usePortrait = false,
   tone = "duotone",
   parallax = false,
   className = "",
 }: SectionBackdropProps) {
   const bgRef = useRef<HTMLDivElement>(null);
+  const activeImage = usePortrait ? portfolioData.personal.portrait : image;
 
   useEffect(() => {
-    if (!parallax || !image) return;
+    if (!parallax || !activeImage) return;
 
     const handleScroll = () => {
       if (!bgRef.current) return;
@@ -31,12 +35,15 @@ export function SectionBackdrop({
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [parallax, image]);
+  }, [parallax, activeImage]);
 
   const getToneClass = () => {
+    if (usePortrait) {
+      return "opacity-[0.035] filter grayscale contrast-200 brightness-75 mix-blend-screen scale-110";
+    }
     switch (tone) {
       case "blurred":
-        return "opacity-[0.07] blur-2xl filter saturate-50";
+        return "opacity-[0.06] blur-2xl filter saturate-50";
       case "dim":
         return "opacity-[0.05] filter brightness-75 contrast-125";
       case "duotone":
@@ -48,15 +55,15 @@ export function SectionBackdrop({
   return (
     <div className={`relative overflow-hidden ${className}`}>
       {/* Background Image Layer (z-index: 0) */}
-      {image && (
+      {activeImage && (
         <div
           ref={bgRef}
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-0 will-change-transform"
+          className="pointer-events-none absolute inset-0 -z-0 will-change-transform flex items-center justify-center overflow-hidden"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={image}
+            src={activeImage}
             alt=""
             loading="lazy"
             decoding="async"

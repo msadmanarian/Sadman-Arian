@@ -1,3 +1,6 @@
+"use client";
+
+import React, { useState } from "react";
 import { Navigation } from "@/components/Navigation/Navigation";
 import { Hero } from "@/components/Hero/Hero";
 import { Projects } from "@/components/Projects/Projects";
@@ -9,41 +12,51 @@ import { Footer } from "@/components/Footer/Footer";
 import { FlowSpine } from "@/components/FlowSpine/FlowSpine";
 import { CommandPalette } from "@/components/CommandPalette/CommandPalette";
 import { GlobalHoverProvider } from "@/components/Interaction/GlobalHoverProvider";
+import { Preloader } from "@/components/Preloader/Preloader";
 
 export default function Home() {
+  const [isLoaded, setIsLoaded] = useState(false);
+
   return (
-    <GlobalHoverProvider>
-      <main className="relative min-h-screen bg-background text-foreground overflow-hidden">
-        {/* Scroll Flow Spine & Wind Flow System (§48) */}
-        <FlowSpine />
+    <>
+      {/* Cinematic Telemetry Preloader for Slow Connections */}
+      <Preloader onLoaded={() => setIsLoaded(true)} />
 
-        {/* Keyboard Command Palette (§49) */}
-        <CommandPalette />
+      <GlobalHoverProvider>
+        <main className={`relative min-h-screen bg-background text-foreground overflow-hidden transition-opacity duration-700 ${
+          isLoaded ? "opacity-100" : "opacity-0"
+        }`}>
+          {/* Scroll Flow Spine & Wind Flow System */}
+          <FlowSpine />
 
-        {/* Fixed Navigation Bar with Magnetic Items (§47) */}
-        <Navigation />
+          {/* Keyboard Command Palette */}
+          <CommandPalette />
 
-        {/* Hero Section with Signature WebGL Liquid Portrait (§4) */}
-        <Hero />
+          {/* Fixed Navigation Bar with Magnetic Items */}
+          <Navigation />
 
-        {/* Selected Works Showcase with SectionBackdrop & Case Study (§46, §49) */}
-        <Projects />
+          {/* Hero Section with Signature Full-Bleed WebGL Liquid Portrait */}
+          <Hero />
 
-        {/* About & Engineering Philosophy with SectionBackdrop (§46) */}
-        <About />
+          {/* Selected Works Showcase */}
+          <Projects />
 
-        {/* Skills Matrix with Magnetic Chips & SectionBackdrop (§46, §47) */}
-        <Skills />
+          {/* About & Engineering Philosophy */}
+          <About />
 
-        {/* Experience & Chronology with SectionBackdrop (§46) */}
-        <Experience />
+          {/* Skills Matrix */}
+          <Skills />
 
-        {/* Interactive Contact & Direct Transmit with SectionBackdrop (§46) */}
-        <Contact />
+          {/* Experience & Chronology */}
+          <Experience />
 
-        {/* Editorial Footer (§23) */}
-        <Footer />
-      </main>
-    </GlobalHoverProvider>
+          {/* Interactive Contact & Direct Transmit */}
+          <Contact />
+
+          {/* Editorial Footer */}
+          <Footer />
+        </main>
+      </GlobalHoverProvider>
+    </>
   );
 }
