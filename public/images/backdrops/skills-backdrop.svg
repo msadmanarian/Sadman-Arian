@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" fill="none">
+  <defs>
+    <radialGradient id="grad3" cx="70%" cy="60%" r="55%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#08080a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#grad3)"/>
+  <circle cx="200" cy="300" r="3" fill="#ffffff" fill-opacity="0.08"/>
+  <circle cx="400" cy="500" r="3" fill="#ffffff" fill-opacity="0.08"/>
+  <circle cx="600" cy="350" r="3" fill="#ffffff" fill-opacity="0.08"/>
+  <circle cx="800" cy="600" r="3" fill="#ffffff" fill-opacity="0.08"/>
+  <circle cx="1000" cy="400" r="3" fill="#ffffff" fill-opacity="0.08"/>
+  <path d="M200 300 L400 500 L600 350 L800 600 L1000 400" stroke="#ffffff" stroke-opacity="0.02" stroke-width="1" fill="none"/>
+</svg>
