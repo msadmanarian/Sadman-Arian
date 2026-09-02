@@ -13,29 +13,36 @@ import { FlowSpine } from "@/components/FlowSpine/FlowSpine";
 import { CommandPalette } from "@/components/CommandPalette/CommandPalette";
 import { GlobalHoverProvider } from "@/components/Interaction/GlobalHoverProvider";
 import { Preloader } from "@/components/Preloader/Preloader";
+import { SmoothScroll } from "@/components/SmoothScroll/SmoothScroll";
+import { F1EasterEgg } from "@/components/EasterEggs/F1EasterEgg";
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
-    <>
-      {/* Cinematic Telemetry Preloader for Slow Connections */}
+    <SmoothScroll>
+      {/* Cinematic Telemetry Preloader */}
       <Preloader onLoaded={() => setIsLoaded(true)} />
 
+      {/* F1 Turbo Mode Easter Egg */}
+      <F1EasterEgg />
+
       <GlobalHoverProvider>
-        <main className={`relative min-h-screen bg-background text-foreground overflow-hidden transition-opacity duration-700 ${
-          isLoaded ? "opacity-100" : "opacity-0"
-        }`}>
+        <main
+          className={`relative min-h-screen bg-background text-foreground overflow-hidden transition-opacity duration-700 ${
+            isLoaded ? "opacity-100" : "opacity-0"
+          }`}
+        >
           {/* Scroll Flow Spine & Wind Flow System */}
           <FlowSpine />
 
           {/* Keyboard Command Palette */}
           <CommandPalette />
 
-          {/* Fixed Navigation Bar with Magnetic Items */}
+          {/* Fixed Navigation Bar with Staggered Rolling Text */}
           <Navigation />
 
-          {/* Hero Section with Signature Full-Bleed WebGL Liquid Portrait */}
+          {/* Hero Section with McLaren P1 Wind Flow & 3D Depth Liquid Portrait */}
           <Hero />
 
           {/* Selected Works Showcase */}
@@ -57,6 +64,6 @@ export default function Home() {
           <Footer />
         </main>
       </GlobalHoverProvider>
-    </>
+    </SmoothScroll>
   );
 }

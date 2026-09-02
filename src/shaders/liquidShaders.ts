@@ -32,13 +32,11 @@ export const liquidFragmentShader = /* glsl */ `
     vec2 i = floor(st);
     vec2 f = fract(st);
 
-    // Four corners in 2D of a tile
     float a = random(i);
     float b = random(i + vec2(1.0, 0.0));
     float c = random(i + vec2(0.0, 1.0));
     float d = random(i + vec2(1.0, 1.0));
 
-    // Smooth Interpolation
     vec2 u = f * f * (3.0 - 2.0 * f);
 
     return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
@@ -75,7 +73,6 @@ export const liquidFragmentShader = /* glsl */ `
   }
 
   void main() {
-    // Aspect ratio corrected coordinates for distance calculation
     float aspect = u_resolution.x / u_resolution.y;
     vec2 aspectUv = vUv;
     aspectUv.x *= aspect;
@@ -83,27 +80,34 @@ export const liquidFragmentShader = /* glsl */ `
     vec2 aspectMouse = u_mouse;
     aspectMouse.x *= aspect;
 
-    // Secondary subtle parallax tilt
-    vec2 uvOffset = vec2(u_tilt_x, u_tilt_y) * 0.012;
-    vec2 baseUv = vUv + uvOffset;
+    // 3D Depth Map Volumetric Estimation (Lando Norris 3D Depth Effect)
+    // Initial sample to compute foreground depth
+    vec2 rawImgUv = getCoverUv(vUv, u_resolution, u_image_resolution);
+    vec4 rawColor = texture2D(u_texture, clamp(rawImgUv, 0.0, 1.0));
+    float rawLum = dot(rawColor.rgb, vec3(0.299, 0.587, 0.114));
 
-    // Get cover-fitted image texture coordinates
+    // Foreground subject depth estimation: subject center + face luminance
+    float centerDist = length((vUv - vec2(0.5, 0.45)) * vec2(1.0, 1.2));
+    float subjectMask = 1.0 - smoothstep(0.1, 0.55, centerDist);
+    float estimatedDepth = smoothstep(0.05, 0.5, rawLum) * subjectMask;
+
+    // Apply volumetric 3D parallax displacement
+    vec2 depthDisplacement = vec2(u_tilt_x, u_tilt_y) * (estimatedDepth * 0.022 + 0.005);
+    vec2 baseUv = vUv + depthDisplacement;
+
+    // Final Cover-fit texture coordinate
     vec2 imgUv = getCoverUv(baseUv, u_resolution, u_image_resolution);
-
-    // Keep uv bounded
     imgUv = clamp(imgUv, 0.0, 1.0);
 
-    // Sample color source texture
+    // Sample color source texture with depth parallax
     vec4 colorTex = texture2D(u_texture, imgUv);
 
     // High quality grayscale conversion with cinematic contrast curve
     float luminance = dot(colorTex.rgb, vec3(0.299, 0.587, 0.114));
-    // Boost contrast slightly for dramatic editorial monochrome
     float contrastLuminance = pow(luminance, 1.15) * 1.05;
     vec3 bwColor = vec3(clamp(contrastLuminance, 0.0, 1.0));
 
     // Liquid Fluid Simulation Math
-    // 1. Directional velocity stretching
     vec2 vel = u_velocity * 0.4;
     float speed = length(vel);
     vec2 velDir = speed > 0.0001 ? normalize(vel) : vec2(0.0);
@@ -117,10 +121,8 @@ export const liquidFragmentShader = /* glsl */ `
     );
     float fluidNoise = fbm(noiseCoord + 4.0 * r);
 
-    // Calculate deformed distance from pointer with fluid turbulence & velocity elongation
+    // Distance from pointer with velocity elongation
     vec2 toMouse = aspectUv - aspectMouse;
-    
-    // Elongate along velocity vector
     float parallelDist = dot(toMouse, velDir);
     vec2 perpDist = toMouse - velDir * parallelDist;
     float stretchFactor = 1.0 + clamp(speed * 3.5, 0.0, 1.5);
@@ -128,7 +130,7 @@ export const liquidFragmentShader = /* glsl */ `
     
     float dist = length(deformedDistVec);
 
-    // Perturb distance using organic fluid noise
+    // Fluid boundary perturbation
     float noisePerturbation = (fluidNoise - 0.5) * (0.18 + speed * 0.15);
     float effectiveDist = dist + noisePerturbation;
 
@@ -136,7 +138,6 @@ export const liquidFragmentShader = /* glsl */ `
     float dynamicRadius = u_radius * (0.85 + 0.3 * sin(u_time * 1.5 + fluidNoise * 6.28));
     float mask = 1.0 - smoothstep(dynamicRadius - u_edge_softness, dynamicRadius + u_edge_softness, effectiveDist);
 
-    // Modulate by interaction strength (ramped on enter, decayed on leave)
     float revealAmount = clamp(mask * u_strength, 0.0, 1.0);
 
     // Fluid edge chromatic refraction / edge shimmer highlight
@@ -152,7 +153,7 @@ export const liquidFragmentShader = /* glsl */ `
     // Blend: Grayscale -> Dispersed Color with Fluid Highlight
     vec3 finalColor = mix(bwColor, dispersedColor, revealAmount) + fluidEdgeHighlight;
 
-    // Subtle vignette around corners
+    // Subtle vignette around edges
     vec2 vigUv = (vUv - 0.5) * vec2(aspect, 1.0);
     float vig = 1.0 - smoothstep(0.7, 1.4, length(vigUv));
     finalColor *= (0.85 + 0.15 * vig);

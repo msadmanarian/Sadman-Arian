@@ -4,7 +4,8 @@ import React, { useState, useEffect } from "react";
 import { useCursor } from "@/components/Cursor/CustomCursor";
 import { portfolioData } from "@/data/portfolio";
 import { MagneticElement } from "@/components/Interaction/MagneticElement";
-import { Menu, X, ArrowUpRight, Command } from "lucide-react";
+import { RollingText } from "@/components/Typography/RollingText";
+import { Menu, X, ArrowUpRight } from "lucide-react";
 
 export function Navigation() {
   const { setCursorState } = useCursor();
@@ -60,7 +61,7 @@ export function Navigation() {
           <span>AVAILABLE FOR WORK</span>
         </div>
 
-        {/* Desktop Navigation Links with Magnetic Items */}
+        {/* Desktop Navigation Links with Staggered Rolling Text */}
         <nav className="hidden md:flex items-center gap-7 font-mono text-xs tracking-editorial text-zinc-400">
           {navLinks.map((link) => (
             <MagneticElement key={link.label} strength={0.25} radius={50}>
@@ -70,7 +71,7 @@ export function Navigation() {
                 onMouseLeave={() => setCursorState("DEFAULT")}
                 className="transition-colors hover:text-white py-1 block"
               >
-                {link.label}
+                <RollingText text={link.label} staggerMs={20} />
               </a>
             </MagneticElement>
           ))}
@@ -83,7 +84,7 @@ export function Navigation() {
               onMouseLeave={() => setCursorState("DEFAULT")}
               className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-2 font-mono text-xs tracking-widest text-white transition-all hover:bg-white hover:text-black hover:border-white"
             >
-              <span>CONNECT</span>
+              <RollingText text="CONNECT" staggerMs={25} />
               <ArrowUpRight className="h-3 w-3" />
             </a>
           </MagneticElement>
