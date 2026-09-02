@@ -56,8 +56,8 @@ export function McLarenWindTunnel() {
         yOffset: isTopFlow ? 0.22 + (i / 16) * 0.42 : 0.66 + ((i - 16) / 8) * 0.22,
         length: 90 + Math.random() * 130,
         speed: 0.8 + Math.random() * 1.1,
-        opacity: 0.28 + Math.random() * 0.4,
-        thickness: 1.2 + Math.random() * 1.4,
+        opacity: 0.35 + Math.random() * 0.45,
+        thickness: 2.0 + Math.random() * 2.0,
         dashPattern: dashPatterns[i % dashPatterns.length],
         color: i % 3 === 0 ? "rgba(56, 189, 248, " : "rgba(255, 255, 255, ",
       };
@@ -72,7 +72,7 @@ export function McLarenWindTunnel() {
       const pointerDiff = Math.abs(pointer.x - lastPointerX);
       if (pointerDiff > 1.0) {
         extraVelocity = Math.min(extraVelocity + pointerDiff * 0.03, 2.5);
-        setSpeedVal(Math.min(120 + Math.floor(extraVelocity * 20), 170));
+        setSpeedVal(Math.min(120 + Math.floor(extraVelocity * 2), 140));
       } else {
         extraVelocity *= 0.95;
         setSpeedVal((prev) => (prev > 120 ? prev - 1 : 120));
@@ -153,28 +153,28 @@ export function McLarenWindTunnel() {
       />
 
       {/* Atmospheric Ambient Glow */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 max-w-4xl h-44 bg-sky-500/15 blur-3xl rounded-full" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 max-w-4xl h-44 bg-sky-500/20 blur-[90px] rounded-full" />
 
-      {/* 100% Uncropped Responsive McLaren P1 Image */}
+      {/* Blurry McLaren P1 Image (~70% Atmospheric Blur) */}
       <div className="relative z-10 w-full h-full flex items-center justify-center max-w-6xl">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/images/McLaren P1 Side Profile.png"
           alt="McLaren P1 Aerodynamic Side Profile"
-          className="w-full h-auto max-h-[52vh] sm:max-h-[60vh] md:max-h-[65vh] object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.95)] opacity-90 transition-transform duration-700 select-none"
+          className="w-full h-auto max-h-[52vh] sm:max-h-[60vh] md:max-h-[65vh] object-contain filter blur-[14px] sm:blur-[16px] md:blur-[18px] opacity-75 transition-all duration-700 select-none"
         />
       </div>
 
-      {/* Stepped Wind Flow Streamlines Canvas */}
+      {/* Blurry Stepped Wind Flow Streamlines Canvas (~70% Atmospheric Blur) */}
       <canvas
         ref={canvasRef}
-        className="pointer-events-none absolute inset-0 z-20 h-full w-full"
+        className="pointer-events-none absolute inset-0 z-20 h-full w-full filter blur-[10px] sm:blur-[12px] opacity-80"
       />
 
-      {/* Telemetry Labels */}
+      {/* Telemetry Labels (Kept Crisp for Legibility) */}
       <div className="pointer-events-none absolute top-3 left-4 sm:left-8 z-30 flex items-center gap-2 rounded-full border border-white/10 bg-black/80 px-3.5 py-1 font-mono text-[10px] text-zinc-300 backdrop-blur-md">
         <Wind className="h-3 w-3 text-sky-400" />
-        <span>MCLAREN P1 // STEPPED CFD FLOW</span>
+        <span>MCLAREN P1 // ATMOSPHERIC CFD FLOW</span>
       </div>
 
       <div className="pointer-events-none absolute top-3 right-4 sm:right-8 z-30 flex items-center gap-2 rounded-full border border-white/10 bg-black/80 px-3.5 py-1 font-mono text-[10px] text-zinc-300 backdrop-blur-md">
