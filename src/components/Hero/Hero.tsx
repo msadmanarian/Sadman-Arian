@@ -2,10 +2,11 @@
 
 import React from "react";
 import { LiquidPortrait } from "./LiquidPortrait";
+import { McLarenWindTunnel } from "./McLarenWindTunnel";
 import { portfolioData } from "@/data/portfolio";
 import { useCursor } from "@/components/Cursor/CustomCursor";
 import { MagneticElement } from "@/components/Interaction/MagneticElement";
-import { ArrowDown, ArrowRight, Sparkles, Terminal, Activity, Code, Award } from "lucide-react";
+import { ArrowDown, ArrowRight, Sparkles, Terminal, Activity } from "lucide-react";
 
 export function Hero() {
   const { setCursorState } = useCursor();
@@ -26,7 +27,7 @@ export function Hero() {
 
           <div className="hidden sm:flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/5 px-3 py-1 font-mono text-xs text-sky-300 backdrop-blur-md">
             <Activity className="h-3 w-3 animate-pulse text-sky-400" />
-            <span>NOW: WebGL Fluid Shaders & AI Systems</span>
+            <span>NOW: WebGL Fluid Shaders & Aerodynamics</span>
           </div>
         </div>
 
@@ -36,22 +37,27 @@ export function Hero() {
         </div>
       </div>
 
+      {/* McLaren P1 Aerodynamic Wind Tunnel Component at the Top */}
+      <div className="w-full z-20 my-4">
+        <McLarenWindTunnel />
+      </div>
+
       {/* Main Center Stage: Lando Norris Inspired Hero Layout */}
       <div className="relative mx-auto my-auto flex w-full max-w-7xl flex-col items-center justify-center">
         {/* Massive Editorial Name Typography Floating Over Hero */}
-        <div className="pointer-events-none z-10 text-center w-full select-none mb-[-2rem] sm:mb-[-4rem] md:mb-[-5rem]">
+        <div className="pointer-events-none z-10 text-center w-full select-none mb-[-2rem] sm:mb-[-3.5rem] md:mb-[-4.5rem]">
           <h1 className="flex flex-col items-center font-black tracking-tighter leading-[0.88] text-white">
             <span className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl text-zinc-500/80 font-light tracking-tight">
               M. SAKIB
             </span>
-            <span className="text-5xl sm:text-7xl md:text-9xl lg:text-[11rem] bg-gradient-to-b from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent drop-shadow-2xl">
+            <span className="text-5xl sm:text-7xl md:text-9xl lg:text-[10.5rem] bg-gradient-to-b from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent drop-shadow-2xl">
               SADMAN ARIAN
             </span>
           </h1>
         </div>
 
         {/* The Dominant Full-Bleed Filled Interactive Portrait Canvas */}
-        <div className="relative z-20 w-full max-w-xl md:max-w-2xl lg:max-w-3xl h-[52vh] sm:h-[62vh] md:h-[68vh] lg:h-[72vh] flex items-end justify-center">
+        <div className="relative z-20 w-full max-w-xl md:max-w-2xl lg:max-w-3xl h-[48vh] sm:h-[58vh] md:h-[64vh] lg:h-[68vh] flex items-end justify-center">
           <LiquidPortrait
             imageSrc={portfolioData.personal.portrait}
             alt={portfolioData.personal.name}
