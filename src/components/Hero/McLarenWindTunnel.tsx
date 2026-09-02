@@ -41,7 +41,7 @@ export function McLarenWindTunnel() {
 
     window.addEventListener("resize", handleResize);
 
-    const streamCount = 10;
+    const streamCount = 24;
     const dashPatterns = [
       [16, 24, 6, 32],
       [10, 18, 28, 14],
@@ -72,7 +72,7 @@ export function McLarenWindTunnel() {
       const pointerDiff = Math.abs(pointer.x - lastPointerX);
       if (pointerDiff > 1.0) {
         extraVelocity = Math.min(extraVelocity + pointerDiff * 0.03, 2.5);
-        setSpeedVal(Math.min(120 + Math.floor(extraVelocity * 2), 140));
+        setSpeedVal(Math.min(120 + Math.floor(extraVelocity * 20), 170));
       } else {
         extraVelocity *= 0.95;
         setSpeedVal((prev) => (prev > 120 ? prev - 1 : 120));
